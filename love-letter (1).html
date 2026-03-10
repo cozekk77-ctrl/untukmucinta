@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>💌 Love Letter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;1,400;1,600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple-dark: #1a0a2e;
+      --purple-mid: #4b2d7f;
+      --purple-light: #9b6fd4;
+      --lavender: #d8b4fe;
+      --white: #ffffff;
+      --cream: #faf7ff;
+      --glow: rgba(155,111,212,0.5);
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 30%, #2d1060 0%, #0f0520 60%, #000 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Dancing Script', cursive;
+      overflow: hidden;
+    }
+
+    /* Stars */
+    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .star {
+      position: absolute; border-radius: 50%; background: white;
+      animation: twinkle var(--d) ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.1; transform: scale(0.7); }
+      to   { opacity: 1;   transform: scale(1.3); }
+    }
+
+    /* Floating particles */
+    .particle {
+      position: fixed; pointer-events: none; z-index: 1;
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(110vh) scale(0.5); opacity: 0; }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    /* Scene */
+    .scene {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* ── ENVELOPE ── */
+    .envelope-wrap {
+      position: relative;
+      width: 340px; height: 230px;
+      cursor: pointer;
+      filter: drop-shadow(0 20px 50px rgba(155,111,212,0.6));
+      transition: filter 0.3s, transform 0.2s;
+      user-select: none;
+    }
+    .envelope-wrap:hover { transform: scale(1.02); filter: drop-shadow(0 25px 60px rgba(155,111,212,0.8)); }
+    .envelope-wrap:active { transform: scale(0.99); }
+
+    /* Body */
+    .env-body {
+      position: absolute; inset: 0;
+      background: linear-gradient(150deg, #f0e8ff 0%, #e5d4ff 60%, #d8b4fe 100%);
+      border-radius: 8px 8px 14px 14px;
+      border: 1.5px solid rgba(155,111,212,0.4);
+      overflow: hidden;
+    }
+    .env-body::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 10px,
+        rgba(155,111,212,0.05) 10px, rgba(155,111,212,0.05) 20px
+      );
+    }
+
+    /* Bottom folds */
+    .fold-l, .fold-r {
+      position: absolute; bottom: 0; border-style: solid;
+    }
+    .fold-l {
+      left: 0; width: 0; height: 0;
+      border-width: 115px 0 0 170px;
+      border-color: transparent transparent transparent rgba(155,111,212,0.15);
+    }
+    .fold-r {
+      right: 0; width: 0; height: 0;
+      border-width: 115px 170px 0 0;
+      border-color: transparent rgba(155,111,212,0.15) transparent transparent;
+    }
+
+    /* Seal */
+    .seal {
+      position: absolute;
+      bottom: 14px; left: 50%; transform: translateX(-50%);
+      width: 48px; height: 48px;
+      background: radial-gradient(circle, var(--purple-light), var(--purple-mid));
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(255,255,255,0.2);
+      z-index: 5;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .envelope-wrap:hover .seal {
+      transform: translateX(-50%) scale(1.1);
+      box-shadow: 0 0 24px var(--glow);
+    }
+
+    /* Flap */
+    .flap {
+      position: absolute; top: 0; left: 0;
+      width: 340px; height: 0;
+      border-left: 170px solid transparent;
+      border-right: 170px solid transparent;
+      border-top: 135px solid #c9a8f0;
+      transform-origin: top center;
+      transform: rotateX(0deg);
+      transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+      z-index: 6;
+    }
+    .flap::after {
+      content: '';
+      position: absolute; top: -135px; left: -170px;
+      width: 340px; height: 135px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .flap.open { transform: rotateX(-180deg); }
+
+    /* ── LETTER ── */
+    .letter {
+      width: 320px;
+      background: var(--cream);
+      border: 1px solid rgba(155,111,212,0.25);
+      border-radius: 4px;
+      padding: 26px 22px 22px;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.5), inset 0 0 30px rgba(155,111,212,0.05);
+      position: relative;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      margin-top: -6px;
+      transition:
+        max-height 0.8s cubic-bezier(0.4,0,0.2,1) 0.35s,
+        opacity 0.6s ease 0.45s;
+      z-index: 4;
+    }
+    .letter.open {
+      max-height: 500px;
+      opacity: 1;
+    }
+
+    /* Paper lines */
+    .letter::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        transparent, transparent 33px,
+        rgba(155,111,212,0.1) 33px, rgba(155,111,212,0.1) 34px
+      );
+      pointer-events: none;
+    }
+
+    .letter-deco {
+      position: absolute; top: 8px; right: 12px;
+      font-size: 20px;
+      animation: sway 3s ease-in-out infinite;
+    }
+    @keyframes sway {
+      0%,100% { transform: rotate(-6deg); }
+      50%      { transform: rotate(6deg); }
+    }
+
+    .letter-date {
+      font-size: 12px; color: var(--purple-light);
+      text-align: right; margin-bottom: 10px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; letter-spacing: 0.5px;
+    }
+    .letter-greeting {
+      font-size: 20px; color: var(--purple-mid);
+      font-weight: 700; margin-bottom: 10px;
+    }
+    .letter-body {
+      font-size: 16px; line-height: 2;
+      color: #2d1a4a; white-space: pre-line;
+    }
+    .letter-body em { color: var(--purple-mid); font-style: italic; font-size: 17px; }
+    .letter-sign {
+      margin-top: 14px; text-align: right;
+      font-size: 18px; color: var(--purple-mid); font-weight: 700;
+    }
+
+    /* Hint */
+    .hint {
+      position: absolute; bottom: -34px;
+      left: 50%; transform: translateX(-50%);
+      color: rgba(216,180,254,0.6);
+      font-size: 13px; letter-spacing: 1px;
+      white-space: nowrap;
+      animation: pulse 2s ease-in-out infinite;
+      transition: opacity 0.4s;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+      50%      { opacity: 1;   transform: translateX(-50%) scale(1.04); }
+    }
+
+    /* Heart burst */
+    .heart-burst { position: fixed; inset: 0; pointer-events: none; z-index: 20; }
+    .h {
+      position: absolute; opacity: 0; pointer-events: none;
+      animation: heartFly 2.2s ease-out forwards;
+    }
+    @keyframes heartFly {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-260px) scale(0.2) rotate(var(--r)); }
+    }
+
+    /* Glow ring */
+    .glow-ring {
+      position: absolute; inset: -4px;
+      border-radius: 12px; pointer-events: none;
+      box-shadow: 0 0 0 0 transparent;
+      transition: box-shadow 0.6s;
+    }
+    .glow-ring.on { box-shadow: 0 0 50px 10px rgba(155,111,212,0.4); }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div id="particles"></div>
+<div class="heart-burst" id="heartBurst"></div>
+
+<div class="scene">
+  <div class="envelope-wrap" id="envWrap" onclick="toggleLetter()">
+    <div class="glow-ring" id="glowRing"></div>
+    <div class="env-body"></div>
+    <div class="flap" id="flap"></div>
+    <div class="fold-l"></div>
+    <div class="fold-r"></div>
+    <div class="seal">🤍</div>
+    <span class="hint" id="hint">✦ klik untuk membuka ✦</span>
+  </div>
+
+  <div class="letter" id="letter">
+    <div class="letter-deco">🪻</div>
+    <div class="letter-date" id="letterDate"></div>
+    <div class="letter-greeting">Untuk mu Nurul,</div>
+    <div class="letter-body">Mungkin bagi awak pertemuan kita ni
+adalah satu <em>kebetulan,</em>
+
+tapi bagi saya tak,
+
+bagi saya pertemuan kita ni
+adalah satu <em>kebahagiaan. 🪻</em></div>
+    <div class="letter-sign">— Yang mencintaimu 🤍</div>
+  </div>
+</div>
+
+<script>
+  /* Stars */
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 130; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+1).toFixed(1)}s;animation-delay:${(Math.random()*5).toFixed(1)}s;`;
+    starsEl.appendChild(s);
+  }
+
+  /* Particles */
+  const particlesEl = document.getElementById('particles');
+  const symbols = ['💜','🤍','🪻','💜','🤍','🪻','💜','🤍'];
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      color:rgba(216,180,254,${(Math.random()*0.5+0.2).toFixed(1)});
+      font-size:${Math.random()*10+8}px;
+      animation-duration:${(Math.random()*10+8).toFixed(1)}s;
+      animation-delay:${(Math.random()*12).toFixed(1)}s;
+    `;
+    particlesEl.appendChild(p);
+  }
+
+  /* Date */
+  const months = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+  const now = new Date();
+  document.getElementById('letterDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  /* Toggle open / close */
+  let isOpen = false;
+
+  function toggleLetter() {
+    isOpen = !isOpen;
+    const flap = document.getElementById('flap');
+    const letter = document.getElementById('letter');
+    const hint = document.getElementById('hint');
+    const glowRing = document.getElementById('glowRing');
+
+    if (isOpen) {
+      flap.classList.add('open');
+      glowRing.classList.add('on');
+      setTimeout(() => letter.classList.add('open'), 350);
+      hint.textContent = '✦ klik untuk menutup ✦';
+      setTimeout(burstHearts, 600);
+      setTimeout(burstHearts, 1100);
+    } else {
+      letter.classList.remove('open');
+      setTimeout(() => flap.classList.remove('open'), 500);
+      glowRing.classList.remove('on');
+      hint.textContent = '✦ klik untuk membuka ✦';
+    }
+  }
+
+  /* Hearts */
+  const heartEmojis = ['💜','🤍','🪻','💜','🤍','🪻','💜','🤍'];
+  function burstHearts() {
+    const rect = document.getElementById('envWrap').getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const burst = document.getElementById('heartBurst');
+    for (let i = 0; i < 10; i++) {
+      const h = document.createElement('div');
+      h.className = 'h';
+      h.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
+      h.style.cssText = `
+        left:${cx + (Math.random()-0.5)*200}px;
+        top:${cy}px;
+        font-size:${Math.random()*14+14}px;
+        --r:${(Math.random()-0.5)*80}deg;
+        animation-delay:${(Math.random()*0.4).toFixed(2)}s;
+      `;
+      burst.appendChild(h);
+      void h.offsetWidth;
+      setTimeout(() => h.remove(), 2500);
+    }
+  }
+</script>
+</body>
+</html>
